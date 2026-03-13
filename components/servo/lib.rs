@@ -15,6 +15,7 @@
 mod clipboard_delegate;
 #[cfg(feature = "gamepad")]
 mod gamepad_provider;
+#[cfg(all(feature = "media-gstreamer", any(target_os = "windows", target_os = "macos")))]
 mod gstreamer_plugins;
 mod javascript_evaluator;
 mod network_manager;

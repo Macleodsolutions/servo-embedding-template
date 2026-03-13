@@ -1,0 +1,85 @@
+name: Sync Upstream & Build Template
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  sync-and-build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+      issues: write
+
+    steps:
+      - name: Checkout integration-template branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: integration-template
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Configure Git User
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add Upstream Remote & Fetch
+        run: |
+          git remote add upstream https://github.com/servo/servo.git
+          git fetch upstream main
+
+      - name: Update Local Main Mirror
+        run: |
+          git branch -f main upstream/main
+          git push origin main --force
+
+      - name: Merge Upstream into integration-template
+        id: merge_step
+        continue-on-error: true
+        run: |
+          git merge main --no-edit
+          git push origin integration-template
+
+      - name: Create Issue on Merge Failure
+        if: steps.merge_step.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 Merge Conflict: Upstream Servo Sync Failed',
+              body: 'The daily sync with `servo/servo` failed due to a merge conflict on the `integration-template` branch.\n\n**Action Required:** Please pull the `integration-template` branch locally, run `git merge main`, resolve the conflicts, and push.'
+            })
+
+      - name: Fail Workflow if Merge Failed
+        if: steps.merge_step.outcome == 'failure'
+        run: exit 1
+
+      - name: Setup Rust Toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Build sdl2_test
+        run: |
+          cargo build -p sdl2_test --release
+
+      - name: Prepare Artifact Bundle
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist
+          Copy-Item "target/release/sdl2_test.exe" -Destination "dist/"
+          Copy-Item -Path "resources" -Destination "dist/" -Recurse
+          
+          New-Item -ItemType Directory -Force -Path "dist/ports/sdl2_test"
+          Copy-Item -Path "ports/sdl2_test/ui" -Destination "dist/ports/sdl2_test/" -Recurse
+
+      - name: Upload Binding Template Bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: binding-template-win
+          path: dist/
+          retention-days: 7

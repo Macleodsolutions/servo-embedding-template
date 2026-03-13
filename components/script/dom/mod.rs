@@ -309,6 +309,7 @@ pub(crate) mod formdataevent;
 pub(crate) mod gamepad;
 #[cfg(feature = "gamepad")]
 pub(crate) use self::gamepad::*;
+pub(crate) mod gameengine;
 pub(crate) mod geolocation;
 pub(crate) use self::geolocation::*;
 pub(crate) mod global_scope_script_execution;

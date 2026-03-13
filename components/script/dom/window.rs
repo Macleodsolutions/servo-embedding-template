@@ -301,6 +301,7 @@ pub(crate) struct Window {
     history: MutNullableDom<History>,
     custom_element_registry: MutNullableDom<CustomElementRegistry>,
     performance: MutNullableDom<Performance>,
+    game_engine: MutNullableDom<crate::dom::gameengine::GameEngine>,
     #[no_trace]
     navigation_start: Cell<CrossProcessInstant>,
     screen: MutNullableDom<Screen>,
@@ -1106,6 +1107,11 @@ pub(crate) fn base64_atob(input: DOMString) -> Fallible<DOMString> {
 
 impl WindowMethods<crate::DomTypeHolder> for Window {
     /// <https://html.spec.whatwg.org/multipage/#dom-alert>
+    fn GameEngine(&self) -> DomRoot<crate::dom::gameengine::GameEngine> {
+        self.game_engine.or_init(|| {
+            crate::dom::gameengine::GameEngine::new(self, None, CanGc::note()).unwrap()
+        })
+    }
     fn Alert_(&self) {
         // Step 2: If the method was invoked with no arguments, then let message be the
         // empty string; otherwise, let message be the method's first argument.
@@ -3783,6 +3789,7 @@ impl Window {
             image_cache_sender,
             image_cache,
             navigator: Default::default(),
+            game_engine: Default::default(),
             location: Default::default(),
             history: Default::default(),
             custom_element_registry: Default::default(),

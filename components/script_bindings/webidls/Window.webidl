@@ -9,6 +9,7 @@
   [LegacyUnforgeable, CrossOriginReadable] readonly attribute WindowProxy window;
   [BinaryName="Self_", Replaceable, CrossOriginReadable] readonly attribute WindowProxy self;
   [LegacyUnforgeable] readonly attribute Document document;
+  [Replaceable] readonly attribute GameEngine gameEngine;
 
   attribute DOMString name;
 

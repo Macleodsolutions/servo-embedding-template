@@ -9,7 +9,9 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use background_hang_monitor::HangMonitorRegister;
-use base::generic_channel::{GenericCallback, GenericSender, RoutedReceiver};
+use base::generic_channel::{GenericCallback, RoutedReceiver};
+#[cfg(feature = "bluetooth")]
+use base::generic_channel::GenericSender;
 pub use base::id::WebViewId;
 use base::id::{PipelineNamespace, PipelineNamespaceId};
 #[cfg(feature = "bluetooth")]
@@ -693,6 +695,13 @@ impl ServoInner {
                     webview
                         .delegate()
                         .notify_accessibility_tree_update(webview, tree_update);
+                }
+            },
+            EmbedderMsg::GameEngineSpawnEnemy(webview_id, enemy_id, x, y) => {
+                if let Some(webview_id) = webview_id {
+                    if let Some(webview) = self.get_webview_handle(webview_id) {
+                        webview.delegate().handle_game_engine_spawn_enemy(webview, enemy_id, x, y);
+                    }
                 }
             },
         }

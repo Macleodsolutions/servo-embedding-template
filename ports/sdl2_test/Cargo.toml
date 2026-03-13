@@ -1,0 +1,18 @@
+[package]
+name = "sdl2_test"
+version = "0.0.1"
+publish = false
+edition = "2024"
+
+[dependencies]
+sdl2 = { version = "0.36.0", features = ["bundled", "static-link"] }
+servo = { path = "../../components/servo", default-features = false, features = ["background_hang_monitor", "testbinding", "gamepad", "webgpu"] }
+euclid = { workspace = true }
+url = { workspace = true }
+dpi = { workspace = true }
+rustls = { workspace = true, features = ["aws-lc-rs"] }
+webrender_api = { workspace = true }
+keyboard-types = { workspace = true }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+servo = { path = "../../components/servo", features = ["no-wgl"] }

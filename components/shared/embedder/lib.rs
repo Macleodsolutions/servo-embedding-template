@@ -518,6 +518,8 @@ pub enum EmbedderMsg {
     InputEventsHandled(WebViewId, Vec<InputEventOutcome>),
     /// Send the embedder an accessibility tree update.
     AccessibilityTreeUpdate(WebViewId, accesskit::TreeUpdate),
+
+    GameEngineSpawnEnemy(Option<WebViewId>, String, f32, f32),
 }
 
 impl Debug for EmbedderMsg {

@@ -999,6 +999,8 @@ pub trait WebViewDelegate {
         _tree_update: accesskit::TreeUpdate,
     ) {
     }
+
+    fn handle_game_engine_spawn_enemy(&self, _webview: WebView, _enemy_id: String, _x: f32, _y: f32) {}
 }
 
 pub(crate) struct DefaultWebViewDelegate;

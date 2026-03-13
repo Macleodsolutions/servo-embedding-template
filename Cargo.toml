@@ -4,6 +4,7 @@ members = [
     "components/media/examples",
     "components/xpath",
     "ports/servoshell",
+    "ports/sdl2_test",
     "tests/unit/*",
 ]
 default-members = ["ports/servoshell"]
