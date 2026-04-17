@@ -1,0 +1,11 @@
+[package]
+name = "embedder-bridge-build"
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+edition.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+[lib]
+path = "lib.rs"

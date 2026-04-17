@@ -200,6 +200,9 @@ use crate::unminify::unminified_path;
 use crate::webdriver_handlers::{find_node_by_unique_id_in_document, jsval_to_webdriver};
 use crate::{fetch, window_named_properties};
 
+include!(concat!(env!("OUT_DIR"), "/bridge_window_fields.rs"));
+include!(concat!(env!("OUT_DIR"), "/bridge_window_methods.rs"));
+
 /// A callback to call when a response comes back from the `ImageCache`.
 ///
 /// This is wrapped in a struct so that we can implement `MallocSizeOf`
@@ -301,6 +304,7 @@ pub(crate) struct Window {
     history: MutNullableDom<History>,
     custom_element_registry: MutNullableDom<CustomElementRegistry>,
     performance: MutNullableDom<Performance>,
+    bridge_fields: BridgeWindowFields,
     #[no_trace]
     navigation_start: Cell<CrossProcessInstant>,
     screen: MutNullableDom<Screen>,
@@ -1106,7 +1110,7 @@ pub(crate) fn base64_atob(input: DOMString) -> Fallible<DOMString> {
 }
 
 impl WindowMethods<crate::DomTypeHolder> for Window {
-    /// <https://html.spec.whatwg.org/multipage/#dom-alert>
+    embedder_bridge_window_methods! {}
     fn Alert_(&self) {
         // Step 2: If the method was invoked with no arguments, then let message be the
         // empty string; otherwise, let message be the method's first argument.
@@ -3700,6 +3704,7 @@ impl Window {
             image_cache,
             navigator: Default::default(),
             crypto: Default::default(),
+            bridge_fields: Default::default(),
             location: Default::default(),
             history: Default::default(),
             custom_element_registry: Default::default(),

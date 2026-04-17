@@ -4966,8 +4966,7 @@ pub(crate) fn init_{infoName}<D: DomTypes>() {{
             if self.member.slotIndices is not None:
                 assert isAlwaysInSlot or self.member.getExtendedAttribute("Cached")
                 isLazilyCachedInSlot = not isAlwaysInSlot
-                # pyrefly: ignore  # unknown-name
-                slotIndex = memberReservedSlot(self.member)  # noqa: F821 FIXME: memberReservedSlot is not defined
+                slotIndex = str(self.member.slotIndices[self.descriptor.interface.identifier.name])
                 # We'll statically assert that this is not too big in
                 # CGUpdateMemberSlotsMethod, in the case when
                 # isAlwaysInSlot is true.

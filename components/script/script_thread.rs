@@ -164,6 +164,8 @@ use crate::task_queue::TaskQueue;
 use crate::webdriver_handlers::jsval_to_webdriver;
 use crate::{devtools, webdriver_handlers};
 
+include!(concat!(env!("OUT_DIR"), "/embedder_bridge_script_dispatch.rs"));
+
 thread_local!(static SCRIPT_THREAD_ROOT: Cell<Option<*const ScriptThread>> = const { Cell::new(None) });
 
 fn with_optional_script_thread<R>(f: impl FnOnce(Option<&ScriptThread>) -> R) -> R {
@@ -1983,6 +1985,8 @@ impl ScriptThread {
             ScriptThreadMessage::TriggerGarbageCollection => unsafe {
                 JS_GC(*GlobalScope::get_cx(), GCReason::API);
             },
+            ScriptThreadMessage::EmbedderBridgeUnused => unreachable!(),
+            other => { embedder_bridge_script_dispatch_arms!(self, other) },
         }
     }
 

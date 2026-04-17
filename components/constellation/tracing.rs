@@ -40,6 +40,8 @@ mod from_embedder {
 
     use super::LogTarget;
 
+    include!(concat!(env!("OUT_DIR"), "/embedder_bridge_constellation_tracing.rs"));
+
     macro_rules! target {
         ($($name:literal)+) => {
             concat!("constellation<embedder@", $($name),+)
@@ -84,6 +86,8 @@ mod from_embedder {
                 Self::UserContentManagerAction(..) => target!("UserContentManagerAction"),
                 Self::UpdatePinchZoomInfos(..) => target!("UpdatePinchZoomInfos"),
                 Self::SetAccessibilityActive(..) => target!("SetAccessibilityActive"),
+                Self::EmbedderBridgeUnused => unreachable!(),
+                other => embedder_bridge_constellation_tracing_arms!(other),
             }
         }
     }

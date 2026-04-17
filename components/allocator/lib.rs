@@ -7,12 +7,21 @@
 
 use std::os::raw::c_void;
 
-#[cfg(not(feature = "allocation-tracking"))]
+#[cfg(all(not(feature = "allocation-tracking"), not(feature = "no-global-allocator")))]
 #[global_allocator]
 static ALLOC: Allocator = Allocator;
 
-#[cfg(feature = "allocation-tracking")]
+#[cfg(all(feature = "allocation-tracking", not(feature = "no-global-allocator")))]
 #[global_allocator]
+static ALLOC: crate::tracking::AccountingAlloc<Allocator> =
+    crate::tracking::AccountingAlloc::with_allocator(Allocator);
+
+#[cfg(all(feature = "no-global-allocator", not(feature = "allocation-tracking")))]
+#[allow(dead_code)]
+static ALLOC: Allocator = Allocator;
+
+#[cfg(all(feature = "no-global-allocator", feature = "allocation-tracking"))]
+#[allow(dead_code)]
 static ALLOC: crate::tracking::AccountingAlloc<Allocator> =
     crate::tracking::AccountingAlloc::with_allocator(Allocator);
 

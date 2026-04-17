@@ -2108,6 +2108,7 @@ class IDLInterface(IDLInterfaceOrNamespace):
                 or identifier == "Abstract"
                 or identifier == "Inline"
                 or identifier == "Transferable"
+                or identifier == "EmbedderBridge"
             ):
                 # Known extended attributes that do not take values
                 if not attr.noArguments():

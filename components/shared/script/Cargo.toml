@@ -47,3 +47,6 @@ stylo_traits = { workspace = true }
 webgpu_traits = { workspace = true, optional = true }
 webrender_api = { workspace = true }
 webxr-api = { workspace = true }
+
+[build-dependencies]
+embedder_bridge_build = { workspace = true }

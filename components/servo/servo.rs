@@ -2,12 +2,28 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
+include!(concat!(env!("OUT_DIR"), "/embedder_bridge_servo_dispatch.rs"));
+
 use std::cell::{Cell, Ref, RefCell, RefMut};
 use std::cmp::max;
 use std::rc::{Rc, Weak};
 use std::sync::Arc;
 use std::time::Duration;
 
+#[cfg(all(
+    not(target_os = "windows"),
+    not(target_os = "ios"),
+    not(target_os = "android"),
+    not(target_arch = "arm"),
+    not(target_arch = "aarch64"),
+    not(target_env = "ohos"),
+))]
+use servo_constellation::content_process_sandbox_profile;
+use servo_constellation::{
+    Constellation, FromEmbedderLogger, FromScriptLogger, InitialConstellationState,
+    NewScriptEventLoopProcessInfo, UnprivilegedContent,
+};
+use servo_constellation_traits::{EmbedderToConstellationMessage, ScriptToConstellationSender};
 use crossbeam_channel::{Receiver, Sender, unbounded};
 pub use embedder_traits::*;
 use env_logger::Builder as EnvLoggerBuilder;
@@ -40,7 +56,7 @@ use profile_traits::{mem, time};
 use rustc_hash::FxHashMap;
 use script::{JSEngineSetup, ServiceWorkerManager};
 use servo_background_hang_monitor::HangMonitorRegister;
-use servo_base::generic_channel::{GenericCallback, GenericSender, RoutedReceiver};
+use servo_base::generic_channel::{GenericCallback, RoutedReceiver};
 pub use servo_base::id::WebViewId;
 use servo_base::id::{EMBEDDER_PIPELINE_NAMESPACE_ID, PipelineNamespace};
 #[cfg(feature = "bluetooth")]
@@ -59,11 +75,7 @@ use servo_config::{opts, pref, prefs};
     not(target_env = "ohos"),
 ))]
 use servo_constellation::content_process_sandbox_profile;
-use servo_constellation::{
-    Constellation, ConstellationToEmbedderMsg, FromEmbedderLogger, FromScriptLogger,
-    InitialConstellationState, NewScriptEventLoopProcessInfo, UnprivilegedContent,
-};
-use servo_constellation_traits::{EmbedderToConstellationMessage, ScriptToConstellationSender};
+use servo_constellation::ConstellationToEmbedderMsg;
 use servo_geometry::{
     DeviceIndependentIntRect, convert_rect_to_css_pixel, convert_size_to_css_pixel,
 };
@@ -689,6 +701,9 @@ impl ServoInner {
                 if let Some(webview) = self.get_webview_handle(webview_id) {
                     webview.process_accessibility_tree_update(tree_update, epoch);
                 }
+            },
+            other => {
+                embedder_bridge_servo_dispatch_arms!(self, other);
             },
         }
     }
@@ -1344,6 +1359,7 @@ struct DefaultWebXrRegistry;
 #[cfg(feature = "webxr")]
 impl webxr::WebXrRegistry for DefaultWebXrRegistry {}
 
+
 /// Builder for [`Servo`].
 pub struct ServoBuilder {
     opts: Option<Box<Opts>>,
@@ -1370,6 +1386,12 @@ impl Default for ServoBuilder {
 impl ServoBuilder {
     pub fn build(self) -> Servo {
         Servo::new(self)
+    }
+
+    pub fn build_with_logging(self) -> Servo {
+        let servo = Servo::new(self);
+        servo.setup_logging();
+        servo
     }
 
     pub fn opts(mut self, opts: Opts) -> Self {

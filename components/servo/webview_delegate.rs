@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
+include!(concat!(env!("OUT_DIR"), "/embedder_bridge_webview_delegate.rs"));
+
 use std::path::PathBuf;
 use std::rc::Rc;
 
@@ -1040,6 +1042,8 @@ pub trait WebViewDelegate {
         _tree_update: accesskit::TreeUpdate,
     ) {
     }
+
+    embedder_bridge_webview_delegate_methods! {}
 }
 
 pub(crate) struct DefaultWebViewDelegate;

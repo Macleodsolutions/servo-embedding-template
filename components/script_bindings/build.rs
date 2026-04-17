@@ -27,6 +27,32 @@ fn main() {
     println!("cargo::rerun-if-changed=third_party/WebIDL/WebIDL.py");
     println!("cargo::rerun-if-changed=third_party/ply");
 
+    let webidls_dir = PathBuf::from("webidls");
+    println!("cargo::rerun-if-env-changed=SERVO_BRIDGE_WEBIDL");
+    match env::var("SERVO_BRIDGE_WEBIDL") {
+        Ok(bridge_webidl) if !bridge_webidl.is_empty() => {
+            println!("cargo::rerun-if-changed={bridge_webidl}");
+        },
+        _ => {
+            eprintln!(
+                "error[script_bindings]: SERVO_BRIDGE_WEBIDL is not set.\n\
+                 Set it to the path of your bridge WebIDL file before building."
+            );
+            std::process::exit(1);
+        },
+    }
+    let bridge_script = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").unwrap())
+        .join("codegen/embedder_bridge.py");
+    let status = find_python()
+        .arg(&bridge_script)
+        .arg(&out_dir)
+        .arg(&webidls_dir)
+        .status()
+        .unwrap();
+    if !status.success() {
+        std::process::exit(1)
+    }
+
     let status = find_python()
         .arg("codegen/run.py")
         .arg(&css_properties_json)

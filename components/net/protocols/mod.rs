@@ -24,11 +24,13 @@ use crate::fetch::methods::{DoneChannel, FetchContext, RangeRequestBounds, fetch
 
 mod blob;
 mod data;
+mod directory;
 mod file;
 
 use blob::BlobProtocolHander;
 use data::DataProtocolHander;
 use file::FileProtocolHander;
+pub use directory::DirectoryProtocolHandler;
 
 type FutureResponse<'a> = Pin<Box<dyn Future<Output = Response> + Send + 'a>>;
 

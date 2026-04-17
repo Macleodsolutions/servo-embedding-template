@@ -163,6 +163,9 @@ webxr = { workspace = true, features = ["glwindow", "headless", "openxr-api"] }
 [target.'cfg(target_env = "ohos")'.dependencies]
 servo-media-ohos = { workspace = true }
 
+[build-dependencies]
+embedder-bridge-build = { package = "embedder-bridge-build", path = "../shared/embedder_bridge_build" }
+
 [dev-dependencies]
 accesskit_consumer = "0.35.0"
 http = { workspace = true }

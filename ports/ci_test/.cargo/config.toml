@@ -1,0 +1,2 @@
+[env]
+SERVO_BRIDGE_WEBIDL = { value = "bridge.webidl", relative = true }

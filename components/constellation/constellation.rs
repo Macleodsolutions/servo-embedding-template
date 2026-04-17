@@ -192,6 +192,8 @@ use crate::process_manager::ProcessManager;
 use crate::serviceworker::ServiceWorkerUnprivilegedContent;
 use crate::session_history::{NeedsToReload, SessionHistoryChange, SessionHistoryDiff};
 
+include!(concat!(env!("OUT_DIR"), "/embedder_bridge_constellation_dispatch.rs"));
+
 struct PendingApprovalNavigation {
     load_data: LoadData,
     history_behaviour: NavigationHistoryBehavior,
@@ -1597,6 +1599,8 @@ where
             EmbedderToConstellationMessage::SetAccessibilityActive(webview_id, active) => {
                 self.set_accessibility_active(webview_id, active);
             },
+            EmbedderToConstellationMessage::EmbedderBridgeUnused => unreachable!(),
+            other => { embedder_bridge_constellation_dispatch_arms!(self, other) },
         }
     }
 

@@ -1,0 +1,21 @@
+[package]
+name = "ci_test"
+version = "0.0.1"
+publish = false
+edition = "2024"
+
+[dependencies]
+servo = { path = "../../components/servo", default-features = false, features = ["background_hang_monitor", "testbinding", "gamepad", "webgpu"] }
+servo_allocator = { package = "servo-allocator", path = "../../components/allocator", features = ["no-global-allocator"] }
+url = { workspace = true }
+dpi = { workspace = true }
+servo-default-resources = { workspace = true }
+
+[dev-dependencies]
+servo = { path = "../../components/servo", default-features = false, features = ["background_hang_monitor", "testbinding", "gamepad", "webgpu"] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+servo = { path = "../../components/servo", features = ["no-wgl"] }
+
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+servo = { path = "../../components/servo", features = ["no-wgl"] }

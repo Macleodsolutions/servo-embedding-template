@@ -24,6 +24,8 @@ use servo_bluetooth_traits::BluetoothRequest;
 use servo_constellation_traits::ScriptToConstellationMessage;
 use stylo_atoms::Atom;
 use timers::TimerScheduler;
+
+include!(concat!(env!("OUT_DIR"), "/embedder_bridge_script_messaging.rs"));
 #[cfg(feature = "webgpu")]
 use webgpu_traits::WebGPUMsg;
 
@@ -110,6 +112,8 @@ impl MixedMessage {
                 ScriptThreadMessage::UpdatePinchZoomInfos(id, _) => Some(*id),
                 ScriptThreadMessage::SetAccessibilityActive(..) => None,
                 ScriptThreadMessage::TriggerGarbageCollection => None,
+                ScriptThreadMessage::EmbedderBridgeUnused => unreachable!(),
+                other => embedder_bridge_script_messaging_arms!(other),
             },
             MixedMessage::FromScript(inner_msg) => match inner_msg {
                 MainThreadScriptMsg::Common(CommonScriptMsg::Task(_, _, pipeline_id, _)) => {

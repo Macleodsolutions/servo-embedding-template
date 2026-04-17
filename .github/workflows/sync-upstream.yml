@@ -1,0 +1,84 @@
+name: Build Template
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  sync-and-build:
+    runs-on: self-hosted
+    permissions:
+      contents: write
+      issues: write
+
+    steps:
+      - name: Checkout integration-template branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: integration-template
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local merge.conflictstyle zdiff3
+          git config --local diff.algorithm histogram
+          git config --local rerere.enabled true
+          git config --local rerere.autoupdate true
+
+      - name: Add Upstream Remote & Fetch
+        run: |
+          git remote add upstream https://github.com/servo/servo.git
+          git fetch upstream main
+
+      - name: Update Local Main Mirror
+        run: |
+          git branch -f main upstream/main
+          git push origin main --force
+
+
+      - name: Setup Rust Toolchain
+        run: rustup toolchain install stable --no-self-update
+        shell: cmd
+        env:
+          CARGO_HOME: D:\ch
+          RUSTUP_HOME: D:\rh
+
+      - name: Install Python dependencies
+        run: pip install jinja2
+
+      - name: Install nextest
+        run: C:\Users\Owner\.cargo\bin\cargo.exe install cargo-nextest --locked
+        shell: cmd
+        env:
+          CARGO_HOME: D:\ch
+
+      - name: Build ci_test
+        run: cargo build -p ci_test --release
+        env:
+          SERVO_BRIDGE_WEBIDL: ${{ github.workspace }}/ports/ci_test/bridge.webidl
+          CARGO_HOME: D:\ch
+
+      - name: Run bridge integration tests
+        run: cargo nextest run -p ci_test --release
+        env:
+          SERVO_BRIDGE_WEBIDL: ${{ github.workspace }}/ports/ci_test/bridge.webidl
+          CARGO_HOME: D:\ch
+
+      - name: Prepare Artifact Bundle
+        run: |
+          New-Item -ItemType Directory -Force -Path dist
+          Copy-Item "target/release/ci_test.exe" -Destination "dist/"
+          Copy-Item -Path "resources" -Destination "dist/" -Recurse
+          New-Item -ItemType Directory -Force -Path "dist/ports/ci_test"
+          Copy-Item -Path "ports/ci_test/ui" -Destination "dist/ports/ci_test/" -Recurse
+
+      - name: Upload Binding Template Bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: binding-template-win
+          path: dist/
+          retention-days: 7

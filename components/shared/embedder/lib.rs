@@ -433,88 +433,97 @@ pub struct BluetoothDeviceDescription {
 }
 
 /// Messages towards the embedder.
-#[derive(Deserialize, IntoStaticStr, Serialize)]
-pub enum EmbedderMsg {
-    /// A status message to be displayed by the browser chrome.
-    Status(WebViewId, Option<String>),
-    /// Alerts the embedder that the current page has changed its title.
-    ChangePageTitle(WebViewId, Option<String>),
-    /// Move the window to a point
-    MoveTo(WebViewId, DeviceIntPoint),
-    /// Resize the window to size
-    ResizeTo(WebViewId, DeviceIntSize),
-    /// Show the user a [simple dialog](https://html.spec.whatwg.org/multipage/#simple-dialogs) (`alert()`, `confirm()`,
-    /// or `prompt()`). Since their messages are controlled by web content, they should be presented to the user in a
-    /// way that makes them impossible to mistake for browser UI.
-    ShowSimpleDialog(WebViewId, SimpleDialogRequest),
-    /// Request to (un)register protocol handler by page content.
-    AllowProtocolHandlerRequest(
-        WebViewId,
-        ProtocolHandlerUpdateRegistration,
-        GenericSender<AllowOrDeny>,
-    ),
-    /// Wether or not to unload a document
-    AllowUnload(WebViewId, GenericSender<AllowOrDeny>),
-    /// Inform embedder to clear the clipboard
-    ClearClipboard(WebViewId),
-    /// Gets system clipboard contents
-    GetClipboardText(WebViewId, GenericCallback<Result<String, String>>),
-    /// Sets system clipboard contents
-    SetClipboardText(WebViewId, String),
-    /// Changes the cursor.
-    SetCursor(WebViewId, Cursor),
-    /// A favicon was detected
-    NewFavicon(WebViewId, Image),
-    /// Get the device independent window rectangle.
-    GetWindowRect(WebViewId, GenericSender<DeviceIndependentIntRect>),
-    /// Get the device independent screen size and available size.
-    GetScreenMetrics(WebViewId, GenericSender<ScreenMetrics>),
-    /// Entered or exited fullscreen.
-    NotifyFullscreenStateChanged(WebViewId, bool),
-    /// The [`LoadStatus`] of the Given `WebView` has changed.
-    NotifyLoadStatusChanged(WebViewId, LoadStatus),
-    /// Open dialog to select bluetooth device.
-    GetSelectedBluetoothDevice(
-        WebViewId,
-        Vec<BluetoothDeviceDescription>,
-        GenericSender<Option<String>>,
-    ),
-    /// Open interface to request permission specified by prompt.
-    PromptPermission(WebViewId, PermissionFeature, GenericSender<AllowOrDeny>),
-    /// Async permission request for screen wake lock. The callback is invoked
-    /// with the user's decision, which resolves or rejects the pending promise
-    /// without blocking the script thread.
-    RequestWakeLockPermission(WebViewId, GenericCallback<AllowOrDeny>),
-    /// Report the status of Devtools Server with a token that can be used to bypass the permission prompt.
-    OnDevtoolsStarted(Result<u16, ()>, String),
-    /// Ask the user to allow a devtools client to connect.
-    RequestDevtoolsConnection(GenericSender<AllowOrDeny>),
-    /// Request to play a haptic effect on a connected gamepad.
-    #[cfg(feature = "gamepad")]
-    PlayGamepadHapticEffect(
-        WebViewId,
-        usize,
-        GamepadHapticEffectType,
-        GenericCallback<bool>,
-    ),
-    /// Request to stop a haptic effect on a connected gamepad.
-    #[cfg(feature = "gamepad")]
-    StopGamepadHapticEffect(WebViewId, usize, GenericCallback<bool>),
-    /// Request to display a notification.
-    ShowNotification(Option<WebViewId>, Notification),
-    /// Let the embedder process a DOM Console API message.
-    /// <https://developer.mozilla.org/en-US/docs/Web/API/Console_API>
-    ShowConsoleApiMessage(Option<WebViewId>, ConsoleLogLevel, String),
-    /// Request to the embedder to display a user interace control.
-    ShowEmbedderControl(EmbedderControlId, DeviceIntRect, EmbedderControlRequest),
-    /// Request to the embedder to hide a user interface control.
-    HideEmbedderControl(EmbedderControlId),
-    /// Inform the embedding layer that a particular `InputEvent` was handled by Servo
-    /// and the embedder can continue processing it, if necessary.
-    InputEventsHandled(WebViewId, Vec<InputEventOutcome>),
-    /// Send the embedder an accessibility tree update.
-    AccessibilityTreeUpdate(WebViewId, TreeUpdate, Epoch),
+macro_rules! define_embedder_msg {
+    ($($extra:tt)*) => {
+        #[derive(Deserialize, IntoStaticStr, Serialize)]
+        pub enum EmbedderMsg {
+            /// A status message to be displayed by the browser chrome.
+            Status(WebViewId, Option<String>),
+            /// Alerts the embedder that the current page has changed its title.
+            ChangePageTitle(WebViewId, Option<String>),
+            /// Move the window to a point
+            MoveTo(WebViewId, DeviceIntPoint),
+            /// Resize the window to size
+            ResizeTo(WebViewId, DeviceIntSize),
+            /// Show the user a [simple dialog](https://html.spec.whatwg.org/multipage/#simple-dialogs) (`alert()`, `confirm()`,
+            /// or `prompt()`). Since their messages are controlled by web content, they should be presented to the user in a
+            /// way that makes them impossible to mistake for browser UI.
+            ShowSimpleDialog(WebViewId, SimpleDialogRequest),
+            /// Request to (un)register protocol handler by page content.
+            AllowProtocolHandlerRequest(
+                WebViewId,
+                ProtocolHandlerUpdateRegistration,
+                GenericSender<AllowOrDeny>,
+            ),
+            /// Wether or not to unload a document
+            AllowUnload(WebViewId, GenericSender<AllowOrDeny>),
+            /// Inform embedder to clear the clipboard
+            ClearClipboard(WebViewId),
+            /// Gets system clipboard contents
+            GetClipboardText(WebViewId, GenericCallback<Result<String, String>>),
+            /// Sets system clipboard contents
+            SetClipboardText(WebViewId, String),
+            /// Changes the cursor.
+            SetCursor(WebViewId, Cursor),
+            /// A favicon was detected
+            NewFavicon(WebViewId, Image),
+            /// Get the device independent window rectangle.
+            GetWindowRect(WebViewId, GenericSender<DeviceIndependentIntRect>),
+            /// Get the device independent screen size and available size.
+            GetScreenMetrics(WebViewId, GenericSender<ScreenMetrics>),
+            /// Entered or exited fullscreen.
+            NotifyFullscreenStateChanged(WebViewId, bool),
+            /// The [`LoadStatus`] of the Given `WebView` has changed.
+            NotifyLoadStatusChanged(WebViewId, LoadStatus),
+            /// Open dialog to select bluetooth device.
+            GetSelectedBluetoothDevice(
+                WebViewId,
+                Vec<BluetoothDeviceDescription>,
+                GenericSender<Option<String>>,
+            ),
+            /// Open interface to request permission specified by prompt.
+            PromptPermission(WebViewId, PermissionFeature, GenericSender<AllowOrDeny>),
+            /// Async permission request for screen wake lock. The callback is invoked
+            /// with the user's decision, which resolves or rejects the pending promise
+            /// without blocking the script thread.
+            RequestWakeLockPermission(WebViewId, GenericCallback<AllowOrDeny>),
+            /// Report the status of Devtools Server with a token that can be used to bypass the permission prompt.
+            OnDevtoolsStarted(Result<u16, ()>, String),
+            /// Ask the user to allow a devtools client to connect.
+            RequestDevtoolsConnection(GenericSender<AllowOrDeny>),
+            /// Request to play a haptic effect on a connected gamepad.
+            #[cfg(feature = "gamepad")]
+            PlayGamepadHapticEffect(
+                WebViewId,
+                usize,
+                GamepadHapticEffectType,
+                GenericCallback<bool>,
+            ),
+            /// Request to stop a haptic effect on a connected gamepad.
+            #[cfg(feature = "gamepad")]
+            StopGamepadHapticEffect(WebViewId, usize, GenericCallback<bool>),
+            /// Request to display a notification.
+            ShowNotification(Option<WebViewId>, Notification),
+            /// Let the embedder process a DOM Console API message.
+            /// <https://developer.mozilla.org/en-US/docs/Web/API/Console_API>
+            ShowConsoleApiMessage(Option<WebViewId>, ConsoleLogLevel, String),
+            /// Request to the embedder to display a user interace control.
+            ShowEmbedderControl(EmbedderControlId, DeviceIntRect, EmbedderControlRequest),
+            /// Request to the embedder to hide a user interface control.
+            HideEmbedderControl(EmbedderControlId),
+            /// Inform the embedding layer that a particular `InputEvent` was handled by Servo
+            /// and the embedder can continue processing it, if necessary.
+            InputEventsHandled(WebViewId, Vec<InputEventOutcome>),
+            /// Send the embedder an accessibility tree update.
+            AccessibilityTreeUpdate(WebViewId, TreeUpdate, Epoch),
+            #[doc(hidden)]
+            EmbedderBridgeUnused,
+            $($extra)*
+        }
+    };
 }
+
+include!(concat!(env!("OUT_DIR"), "/embedder_bridge_embedder_msg.rs"));
 
 impl Debug for EmbedderMsg {
     fn fmt(&self, formatter: &mut Formatter) -> Result<(), Error> {

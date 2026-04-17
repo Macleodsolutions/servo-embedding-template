@@ -176,3 +176,6 @@ xpath = { workspace = true }
 
 [target.'cfg(not(target_os = "ios"))'.dependencies]
 mozangle = { workspace = true }
+
+[build-dependencies]
+embedder_bridge_build = { workspace = true }

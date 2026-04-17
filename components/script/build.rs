@@ -34,6 +34,31 @@ fn main() {
         )
         .unwrap();
     });
+    embedder_bridge_build::run(out_dir.to_str().unwrap());
+
+    std::fs::read_dir(&script_bindings_out_dir)
+        .unwrap()
+        .filter_map(|res| res.map(|e| e.path()).ok())
+        .filter(|path| {
+            path.is_file()
+                && path
+                    .file_name()
+                    .and_then(|n| n.to_str())
+                    .map(|n| n.starts_with("bridge_") && n.ends_with(".rs"))
+                    .unwrap_or(false)
+        })
+        .for_each(|file| {
+            println!(
+                "cargo::rerun-if-changed={}",
+                file.display()
+            );
+            std::fs::copy(
+                &file,
+                out_dir.join(file.file_name().unwrap()),
+            )
+            .unwrap();
+        });
+
     // copy ConcreteBindings folder
     let _ = std::fs::create_dir(out_dir.join("ConcreteBindings"));
     let script_concrete_bindings_out_dir = script_bindings_out_dir.join("ConcreteBindings");

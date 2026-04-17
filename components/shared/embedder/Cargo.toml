@@ -43,3 +43,6 @@ url = { workspace = true }
 uuid = { workspace = true }
 webdriver = { workspace = true }
 webrender_api = { workspace = true }
+
+[build-dependencies]
+embedder_bridge_build = { workspace = true }

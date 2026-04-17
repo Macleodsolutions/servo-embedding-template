@@ -1,0 +1,33 @@
+<html>
+<head>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #2e2e30; color: white; }
+        button { padding: 10px; font-size: 16px; cursor: pointer; }
+        #log { margin-top: 20px; font-family: monospace; font-size: 14px; }
+        .entry { padding: 2px 0; }
+    </style>
+</head>
+<body>
+    <h1>GameEngine Bidirectional Bridge</h1>
+    <p>JS → Rust: click the button. Rust → JS: the enemydied event fires back.</p>
+    <button onclick='window.gameEngine.spawnEnemy("goblin", 100.5, 42.1)'>
+        Spawn Enemy (JS → Rust → JS)
+    </button>
+    <div id="log"></div>
+    <script>
+        function log(msg) {
+            const el = document.createElement('div');
+            el.className = 'entry';
+            el.textContent = msg;
+            document.getElementById('log').prepend(el);
+        }
+
+        window.gameEngine.addEventListener('enemydied', function(e) {
+            log('enemydied ← Rust: id=' + e.enemyId + ' x=' + e.x + ' y=' + e.y);
+        });
+
+        window.gameEngine.onenemydied = function(e) {
+        };
+    </script>
+</body>
+</html>

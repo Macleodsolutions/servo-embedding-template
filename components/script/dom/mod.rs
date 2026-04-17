@@ -284,6 +284,7 @@ pub(crate) mod fullscreen;
 pub(crate) mod gamepad;
 #[cfg(feature = "gamepad")]
 pub(crate) use self::gamepad::*;
+include!(concat!(env!("OUT_DIR"), "/bridge_dom_modules.rs"));
 pub(crate) mod geolocation;
 pub(crate) use self::geolocation::*;
 pub(crate) mod global_scope_script_execution;
