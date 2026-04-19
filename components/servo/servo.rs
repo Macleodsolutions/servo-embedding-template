@@ -66,15 +66,6 @@ use servo_bluetooth_traits::BluetoothRequest;
 use servo_config::opts::Opts;
 use servo_config::prefs::{PrefValue, Preferences};
 use servo_config::{opts, pref, prefs};
-#[cfg(all(
-    not(target_os = "windows"),
-    not(target_os = "ios"),
-    not(target_os = "android"),
-    not(target_arch = "arm"),
-    not(target_arch = "aarch64"),
-    not(target_env = "ohos"),
-))]
-use servo_constellation::content_process_sandbox_profile;
 use servo_constellation::ConstellationToEmbedderMsg;
 use servo_geometry::{
     DeviceIndependentIntRect, convert_rect_to_css_pixel, convert_size_to_css_pixel,
